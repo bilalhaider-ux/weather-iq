@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WeatherIQ AI | Meteorological Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;600;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        colors: {
+          "tertiary-fixed": "#ffddb8","on-error": "#690005","on-surface": "#e5e2e3","primary": "#c3c6d7",
+          "surface-container-lowest": "#0e0e0f","inverse-on-surface": "#313031","on-surface-variant": "#c7c6cc",
+          "surface-variant": "#353436","on-tertiary": "#472a00","surface-tint": "#c3c6d7",
+          "on-secondary-container": "#b3b1ff","on-background": "#e5e2e3","on-secondary-fixed": "#0f0069",
+          "on-tertiary-container": "#ad6e00","primary-fixed": "#dfe2f3","on-primary": "#2c303d",
+          "error-container": "#93000a","tertiary-container": "#190c00","on-secondary-fixed-variant": "#3323cc",
+          "inverse-surface": "#e5e2e3","outline-variant": "#46464c","tertiary": "#ffb95f","secondary": "#c3c0ff",
+          "inverse-primary": "#5a5e6d","surface-container-highest": "#353436","on-primary-container": "#777b8a",
+          "surface-container-high": "#2a2a2b","primary-fixed-dim": "#c3c6d7","secondary-fixed": "#e2dfff",
+          "surface-dim": "#131314","on-secondary": "#1d00a5","error": "#ffb4ab","surface-bright": "#3a393a",
+          "tertiary-fixed-dim": "#ffb95f","outline": "#909096","on-primary-fixed": "#171b28",
+          "secondary-container": "#3626ce","primary-container": "#0a0e1a","on-error-container": "#ffdad6",
+          "on-primary-fixed-variant": "#434654","on-tertiary-fixed-variant": "#653e00",
+          "surface": "#131314","secondary-fixed-dim": "#c3c0ff","surface-container-low": "#1c1b1c",
+          "surface-container": "#201f20","background": "#131314","on-tertiary-fixed": "#2a1700"
+        },
+        borderRadius: { "DEFAULT": "0.25rem","lg": "0.5rem","xl": "0.75rem","full": "9999px" },
+        spacing: { "container-margin": "2rem","gutter": "1.5rem","card-padding": "1.5rem","stack-lg": "2rem","stack-sm": "0.5rem","stack-md": "1rem" },
+        fontFamily: { "display-xl": ["Outfit"],"headline-md": ["Outfit"],"headline-sm": ["Outfit"],"display-lg": ["Outfit"],"body-lg": ["Inter"],"body-md": ["Inter"],"label-md": ["Inter"],"label-sm": ["Inter"],"title-lg": ["Inter"] },
+        fontSize: {
+          "display-xl": ["72px", {"lineHeight":"80px","letterSpacing":"-0.02em","fontWeight":"700"}],
+          "headline-sm": ["24px", {"lineHeight":"32px","fontWeight":"500"}],
+          "title-lg": ["20px", {"lineHeight":"28px","fontWeight":"600"}],
+          "body-md": ["16px", {"lineHeight":"24px","fontWeight":"400"}],
+          "label-sm": ["12px", {"lineHeight":"16px","letterSpacing":"0.05em","fontWeight":"600"}],
+          "label-md": ["14px", {"lineHeight":"20px","letterSpacing":"0.01em","fontWeight":"500"}]
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background-color: #0e0e0f; color: #e5e2e3; overflow-x: hidden; }
+  .glass-card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+    backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);
+    position: relative; overflow: hidden;
+  }
+  .ai-glow-border { box-shadow: 0 0 15px rgba(168,85,247,0.15); border: 1px solid rgba(168,85,247,0.4); }
+  .typewriter-cursor::after { content: '|'; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .gauge-needle { transform-origin: 50% 100%; transition: transform 1.5s ease-out; }
+  .rim-light { box-shadow: inset 0 1px 1px rgba(255,255,255,0.1); }
+  @keyframes sunPulse { 0%,100%{filter:drop-shadow(0 0 20px rgba(245,158,11,0.4))} 50%{filter:drop-shadow(0 0 40px rgba(245,158,11,0.7))} }
+  .sun-glow { animation: sunPulse 3s ease-in-out infinite; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Sidebar -->
+<aside id="sidebar-menu" class="h-screen w-64 fixed left-0 top-0 flex flex-col p-stack-lg border-r border-white/10 bg-surface/30 backdrop-blur-xl shadow-2xl z-50 -translate-x-full transition-transform duration-300 md:translate-x-0">
+  <!-- Mobile Close Button -->
+  <button id="sidebar-close-btn" class="absolute top-6 right-6 text-on-surface-variant hover:text-white md:hidden cursor-pointer border-none bg-transparent">
+    <span class="material-symbols-outlined">close</span>
+  </button>
+  <div class="mb-12">
+    <h1 class="text-3xl font-black text-primary" style="font-family:Outfit">WeatherIQ</h1>
+    <p class="text-sm text-on-surface-variant opacity-70 mt-1" style="font-family:Inter">AI Analyst Active</p>
+  </div>
+  <nav class="flex-1 space-y-2">
+    <a class="flex items-center gap-3 px-4 py-3 text-primary bg-secondary-container/20 rounded-lg" href="#">
+      <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">dashboard</span>
+      <span>Dashboard</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg transition-colors" href="#">
+      <span class="material-symbols-outlined">map</span><span>Global Maps</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg transition-colors" href="#">
+      <span class="material-symbols-outlined">psychology</span><span>AI Predictions</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg transition-colors" href="#">
+      <span class="material-symbols-outlined">warning</span><span>Alert History</span>
+    </a>
+    <a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-on-surface hover:bg-white/5 rounded-lg transition-colors" href="#">
+      <span class="material-symbols-outlined">settings</span><span>Settings</span>
+    </a>
+  </nav>
+  <div class="mt-auto space-y-4">
+    <button class="w-full py-3 bg-secondary-container text-on-secondary-container rounded-xl font-bold text-sm hover:opacity-90 transition-opacity">Upgrade to Pro</button>
+    <div class="pt-4 border-t border-white/10 space-y-2">
+      <a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface" href="#">
+        <span class="material-symbols-outlined">help</span><span class="text-sm">Support</span>
+      </a>
+      <a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-on-surface" href="#">
+        <span class="material-symbols-outlined">logout</span><span class="text-sm">Sign Out</span>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebar-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
+<!-- Top Nav -->
+<header class="fixed top-0 right-0 left-0 md:left-64 h-16 flex justify-between items-center px-4 md:px-8 bg-surface/10 backdrop-blur-md border-b border-white/10 z-40">
+  <div class="flex items-center gap-3 md:gap-8">
+    <!-- Menu Toggle -->
+    <button id="sidebar-open-btn" class="md:hidden text-on-surface-variant hover:text-white p-1 cursor-pointer bg-transparent border-none flex items-center">
+      <span class="material-symbols-outlined text-2xl">menu</span>
+    </button>
+    <span class="text-lg md:text-xl font-black text-primary" style="font-family:Outfit">WeatherIQ AI</span>
+    <div class="hidden sm:flex gap-6">
+      <a class="text-sm font-semibold text-primary border-b-2 border-primary pb-1" href="#">Radar</a>
+      <a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-all" href="#">Satellites</a>
+      <a class="text-sm font-semibold text-on-surface-variant hover:text-primary transition-all" href="#">Models</a>
+    </div>
+  </div>
+  <div class="flex items-center gap-3 md:gap-6">
+    <div id="live-clock" class="text-sm text-on-surface-variant font-medium bg-white/5 border border-white/10 rounded-full px-4 py-2 hidden lg:block"></div>
+    <button class="bg-primary px-3 md:px-4 py-2 rounded-lg text-on-primary text-xs md:text-sm font-bold opacity-80 hover:opacity-100 transition-all">
+      <span class="sm:inline hidden">Run AI Sync</span>
+      <span class="sm:hidden flex items-center material-symbols-outlined text-sm">sync</span>
+    </button>
+    <div class="flex gap-2 sm:gap-4 flex-shrink-0">
+      <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface cursor-pointer">notifications</span>
+      <span class="material-symbols-outlined text-on-surface-variant hover:text-on-surface cursor-pointer">account_circle</span>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="ml-0 md:ml-64 mt-16 p-4 md:p-8 space-y-6">
+  <div class="grid grid-cols-12 gap-6">
+
+    <!-- Left: Hero Card -->
+    <section class="col-span-12 lg:col-span-7">
+      <div class="glass-card rounded-[2rem] p-6 sm:p-10 h-full relative group" style="box-shadow: 0 0 60px rgba(245,158,11,0.05)">
+        <div class="flex justify-between items-start mb-10">
+          <div class="space-y-1">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-on-surface-variant text-sm">location_on</span>
+              <h2 class="text-xl sm:text-2xl font-bold text-on-surface" style="font-family:Outfit">Lahore, Pakistan</h2>
+            </div>
+            <p class="text-xs sm:text-sm text-on-surface-variant opacity-60" id="hero-date">Monday, Jun 12 • 11:54 PM</p>
+          </div>
+          <div class="flex bg-white/5 p-1 rounded-full border border-white/10 flex-shrink-0">
+            <button class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary text-on-primary text-[10px] sm:text-xs font-bold" id="btn-c">°C</button>
+            <button class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-on-surface-variant text-[10px] sm:text-xs font-bold" id="btn-f">°F</button>
+          </div>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center gap-6 sm:gap-12 mb-8 sm:mb-14 text-center sm:text-left">
+          <div class="relative sun-glow flex-shrink-0">
+            <svg fill="none" height="130" viewBox="0 0 200 200" width="130" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <radialGradient cx="100" cy="100" gradientUnits="userSpaceOnUse" id="sunGrad" r="50">
+                  <stop offset="0%" stop-color="#F59E0B"/>
+                  <stop offset="100%" stop-color="#D97706"/>
+                </radialGradient>
+                <filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
+                  <feGaussianBlur result="blur" stdDeviation="6"/>
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+                </filter>
+              </defs>
+              <circle cx="100" cy="100" fill="url(#sunGrad)" filter="url(#glow)" r="45">
+                <animate attributeName="r" dur="4s" repeatCount="indefinite" values="45;49;45"/>
+              </circle>
+              <g stroke="#F59E0B" stroke-linecap="round" stroke-width="8">
+                <line x1="100" x2="100" y1="18" y2="38"><animateTransform attributeName="transform" dur="20s" from="0 100 100" repeatCount="indefinite" to="360 100 100" type="rotate"/></line>
+                <line x1="100" x2="100" y1="162" y2="182"><animateTransform attributeName="transform" dur="20s" from="45 100 100" repeatCount="indefinite" to="405 100 100" type="rotate"/></line>
+                <line x1="18" x2="38" y1="100" y2="100"><animateTransform attributeName="transform" dur="20s" from="90 100 100" repeatCount="indefinite" to="450 100 100" type="rotate"/></line>
+                <line x1="162" x2="182" y1="100" y2="100"><animateTransform attributeName="transform" dur="20s" from="135 100 100" repeatCount="indefinite" to="495 100 100" type="rotate"/></line>
+                <line x1="43" x2="58" y1="43" y2="58"><animateTransform attributeName="transform" dur="20s" from="180 100 100" repeatCount="indefinite" to="540 100 100" type="rotate"/></line>
+                <line x1="142" x2="157" y1="142" y2="157"><animateTransform attributeName="transform" dur="20s" from="225 100 100" repeatCount="indefinite" to="585 100 100" type="rotate"/></line>
+                <line x1="157" x2="142" y1="43" y2="58"><animateTransform attributeName="transform" dur="20s" from="270 100 100" repeatCount="indefinite" to="630 100 100" type="rotate"/></line>
+                <line x1="58" x2="43" y1="142" y2="157"><animateTransform attributeName="transform" dur="20s" from="315 100 100" repeatCount="indefinite" to="675 100 100" type="rotate"/></line>
+              </g>
+            </svg>
+          </div>
+          <div>
+            <div class="flex items-start justify-center sm:justify-start">
+              <span id="temp-display" class="font-black text-white tracking-tighter" style="font-size:clamp(64px, 10vw, 90px);line-height:1;font-family:Outfit">38</span>
+              <span class="text-2xl sm:text-4xl font-bold text-white/60 mt-2 sm:mt-4" id="unit-display">°C</span>
+            </div>
+            <div class="flex items-center justify-center sm:justify-start gap-2 text-tertiary mt-2">
+              <span class="material-symbols-outlined">wb_sunny</span>
+              <span class="text-base sm:text-lg font-semibold" style="font-family:Outfit">Extremely Sunny</span>
+            </div>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 sm:gap-6 pt-8 border-t border-white/10 text-center sm:text-left">
+          <div class="space-y-1">
+            <p class="text-[10px] sm:text-xs text-on-surface-variant uppercase tracking-wider font-bold">Humidity</p>
+            <p class="text-base sm:text-xl font-bold">28%</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-[10px] sm:text-xs text-on-surface-variant uppercase tracking-wider font-bold">Wind</p>
+            <p class="text-base sm:text-xl font-bold">12 km/h</p>
+          </div>
+          <div class="space-y-1">
+            <p class="text-[10px] sm:text-xs text-on-surface-variant uppercase tracking-wider font-bold">Feels Like</p>
+            <p class="text-base sm:text-xl font-bold" id="feels-display">42°C</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column -->
+    <section class="col-span-12 lg:col-span-5 space-y-6">
+
+      <!-- WeatherIQ Score -->
+      <div class="glass-card rounded-[1.5rem] p-6" style="box-shadow: 0 0 30px rgba(245,158,11,0.05); border-color: rgba(245,158,11,0.15)">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-bold">⚡ WeatherIQ Score</h3>
+          <span class="text-xs font-bold px-3 py-1 rounded-full bg-error/20 text-error border border-error/30">HIGHLY UNUSUAL</span>
+        </div>
+        <div class="flex flex-col sm:flex-row items-center justify-around gap-6 sm:gap-0 mb-6">
+          <div class="relative w-44 h-24">
+            <svg class="w-full" viewBox="0 0 100 50">
+              <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="rgba(255,255,255,0.08)" stroke-linecap="round" stroke-width="8"/>
+              <path d="M10,50 A40,40 0 0,1 90,50" fill="none" stroke="url(#scoreGrad)" stroke-dasharray="100,126" stroke-linecap="round" stroke-width="8"/>
+              <defs>
+                <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#F59E0B"/>
+                  <stop offset="100%" stop-color="#EF4444"/>
+                </linearGradient>
+              </defs>
+              <line class="gauge-needle" stroke="#e5e2e3" stroke-linecap="round" stroke-width="2.5" x1="50" x2="50" y1="50" y2="14"/>
+              <circle cx="50" cy="50" fill="#1c1b1c" r="4" stroke="#e5e2e3" stroke-width="1.5"/>
+            </svg>
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-center">
+              <span class="text-3xl font-black" id="score-num">0</span>
+              <span class="text-on-surface-variant text-sm">/100</span>
+            </div>
+          </div>
+          <div class="flex flex-col gap-3 w-full max-w-[14rem] sm:w-36">
+            <div class="space-y-1">
+              <div class="flex justify-between text-[10px] uppercase font-bold text-on-surface-variant"><span>Temperature</span><span class="text-error">91</span></div>
+              <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-error rounded-full" id="bar-temp" style="width:0%;transition:width 1.2s ease"></div></div>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-[10px] uppercase font-bold text-on-surface-variant"><span>Humidity</span><span class="text-secondary">72</span></div>
+              <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-secondary rounded-full" id="bar-hum" style="width:0%;transition:width 1.2s ease 0.3s"></div></div>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-[10px] uppercase font-bold text-on-surface-variant"><span>Wind</span><span class="text-tertiary">45</span></div>
+              <div class="h-1.5 bg-white/5 rounded-full overflow-hidden"><div class="h-full bg-tertiary rounded-full" id="bar-wind" style="width:0%;transition:width 1.2s ease 0.6s"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Analyst Card -->
+      <div class="glass-card ai-glow-border rounded-[1.5rem] p-6">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="material-symbols-outlined text-secondary" style="font-variation-settings:'FILL' 1">auto_awesome</span>
+          <h3 class="text-lg font-bold text-secondary">AI Weather Analyst</h3>
+        </div>
+        <div class="min-h-[80px]">
+          <p class="text-sm italic text-on-surface leading-relaxed" id="ai-insight"></p>
+        </div>
+        <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+          <span class="text-xs text-on-surface-variant flex items-center gap-2 bg-secondary/10 border border-secondary/20 rounded-full px-3 py-1.5">
+            ✦ Powered by Gemini
+          </span>
+          <span class="material-symbols-outlined text-secondary text-sm">bolt</span>
+        </div>
+      </div>
+
+      <!-- Stats Card -->
+      <div class="glass-card rounded-[1.5rem] p-6">
+        <div class="flex justify-between items-start mb-5">
+          <div>
+            <h3 class="text-lg font-bold">📊 Statistical Context</h3>
+            <p class="text-xs text-on-surface-variant mt-0.5">Week Average Deviation</p>
+          </div>
+          <span class="text-error font-bold text-lg">+5°C</span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-white/3 border border-white/6 rounded-xl p-3">
+            <p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wide">Week's Avg</p>
+            <p class="text-xl font-black text-tertiary mt-1">33°C</p>
+          </div>
+          <div class="bg-white/3 border border-white/6 rounded-xl p-3">
+            <p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wide">Deviation</p>
+            <p class="text-xl font-black text-error mt-1">+5°C</p>
+          </div>
+          <div class="bg-white/3 border border-white/6 rounded-xl p-3">
+            <p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wide">Trend</p>
+            <p class="text-xl font-black text-tertiary mt-1">↑ Rising</p>
+          </div>
+          <div class="bg-white/3 border border-white/6 rounded-xl p-3">
+            <p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wide">Window</p>
+            <p class="text-sm font-bold text-on-surface-variant mt-1">5-day / 40 pts</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 5-Day Forecast -->
+  <section class="flex md:grid md:grid-cols-5 overflow-x-auto md:overflow-x-visible pb-3 md:pb-0 gap-4 snap-x scrollbar-none">
+    <div class="glass-card p-5 rounded-2xl text-center flex flex-col items-center gap-3 hover:border-primary/40 transition-colors cursor-pointer snap-start flex-shrink-0 w-[125px] md:w-auto">
+      <span class="text-xs font-black text-on-surface-variant uppercase tracking-widest">Mon</span>
+      <span class="material-symbols-outlined text-tertiary text-4xl">sunny</span>
+      <div class="flex flex-col"><span class="text-lg font-bold">38°</span><span class="text-on-surface-variant text-xs">28°</span></div>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center flex flex-col items-center gap-3 hover:border-primary/40 transition-colors cursor-pointer snap-start flex-shrink-0 w-[125px] md:w-auto">
+      <span class="text-xs font-black text-on-surface-variant uppercase tracking-widest">Tue</span>
+      <span class="material-symbols-outlined text-primary text-4xl">partly_cloudy_day</span>
+      <div class="flex flex-col"><span class="text-lg font-bold">35°</span><span class="text-on-surface-variant text-xs">26°</span></div>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center flex flex-col items-center gap-3 border-primary/20 bg-white/5 cursor-pointer snap-start flex-shrink-0 w-[125px] md:w-auto">
+      <span class="text-xs font-black text-on-surface-variant uppercase tracking-widest">Wed</span>
+      <span class="material-symbols-outlined text-blue-400 text-4xl">rainy</span>
+      <div class="flex flex-col"><span class="text-lg font-bold">29°</span><span class="text-on-surface-variant text-xs">22°</span></div>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center flex flex-col items-center gap-3 hover:border-primary/40 transition-colors cursor-pointer snap-start flex-shrink-0 w-[125px] md:w-auto">
+      <span class="text-xs font-black text-on-surface-variant uppercase tracking-widest">Thu</span>
+      <span class="material-symbols-outlined text-primary text-4xl">cloud</span>
+      <div class="flex flex-col"><span class="text-lg font-bold">31°</span><span class="text-on-surface-variant text-xs">24°</span></div>
+    </div>
+    <div class="glass-card p-5 rounded-2xl text-center flex flex-col items-center gap-3 hover:border-primary/40 transition-colors cursor-pointer snap-start flex-shrink-0 w-[125px] md:w-auto">
+      <span class="text-xs font-black text-on-surface-variant uppercase tracking-widest">Fri</span>
+      <span class="material-symbols-outlined text-tertiary text-4xl">sunny</span>
+      <div class="flex flex-col"><span class="text-lg font-bold">36°</span><span class="text-on-surface-variant text-xs">27°</span></div>
+    </div>
+  </section>
+
+  <!-- Temperature Chart -->
+  <footer class="glass-card rounded-[2rem] h-64 relative overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <svg fill="none" height="100%" viewBox="0 0 1000 300" width="100%" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient gradientUnits="userSpaceOnUse" id="chartGradient" x1="500" x2="500" y1="0" y2="300">
+            <stop stop-color="#F59E0B" stop-opacity="0.35"/>
+            <stop offset="100%" stop-color="#F59E0B" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0 250C100 230 200 280 300 240C400 200 500 100 600 150C700 200 800 180 900 220C950 240 1000 250 1000 250V300H0V250Z" fill="url(#chartGradient)">
+          <animate attributeName="d" dur="8s" repeatCount="indefinite" values="M0 250C100 230 200 280 300 240C400 200 500 100 600 150C700 200 800 180 900 220C950 240 1000 250 1000 250V300H0V250Z;M0 260C100 240 200 270 300 230C400 210 500 110 600 140C700 210 800 190 900 210C950 230 1000 260 1000 260V300H0V260Z;M0 250C100 230 200 280 300 240C400 200 500 100 600 150C700 200 800 180 900 220C950 240 1000 250 1000 250V300H0V250Z"/>
+        </path>
+        <path d="M0 250C100 230 200 280 300 240C400 200 500 100 600 150C700 200 800 180 900 220C950 240 1000 250 1000 250" stroke="#F59E0B" stroke-linecap="round" stroke-width="3">
+          <animate attributeName="d" dur="8s" repeatCount="indefinite" values="M0 250C100 230 200 280 300 240C400 200 500 100 600 150C700 200 800 180 900 220C950 240 1000 250 1000 250;M0 260C100 240 200 270 300 230C400 210 500 110 600 140C700 210 800 190 900 210C950 230 1000 260 1000 260;M0 250C100 230 200 280 300 240C400 200 500 100 600 150C700 200 800 180 900 220C950 240 1000 250 1000 250"/>
+        </path>
+      </svg>
+    </div>
+    <div class="relative z-10 p-6 flex flex-col justify-between h-full pointer-events-none">
+      <div class="flex justify-between items-start">
+        <div>
+          <h4 class="text-lg font-bold">Regional Temperature Flow</h4>
+          <p class="text-xs text-on-surface-variant">Real-time AI Atmospheric Interpolation</p>
+        </div>
+        <div class="flex gap-4">
+          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_8px_#ffb95f]"></div><span class="text-[10px] uppercase font-bold text-on-surface-variant">Surface</span></div>
+          <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-secondary shadow-[0_0_8px_#c3c0ff]"></div><span class="text-[10px] uppercase font-bold text-on-surface-variant">Stratosphere</span></div>
+        </div>
+      </div>
+      <div class="flex justify-between text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script>
+  // Mobile Sidebar Toggle
+  const sidebarMenu = document.getElementById('sidebar-menu');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+  const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+  const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+
+  if (sidebarOpenBtn && sidebarMenu && sidebarBackdrop) {
+    sidebarOpenBtn.addEventListener('click', () => {
+      sidebarMenu.classList.remove('-translate-x-full');
+      sidebarMenu.classList.add('translate-x-0');
+      sidebarBackdrop.classList.remove('hidden');
+    });
+  }
+
+  if (sidebarCloseBtn && sidebarMenu && sidebarBackdrop) {
+    sidebarCloseBtn.addEventListener('click', () => {
+      sidebarMenu.classList.add('-translate-x-full');
+      sidebarMenu.classList.remove('translate-x-0');
+      sidebarBackdrop.classList.add('hidden');
+    });
+  }
+
+  if (sidebarBackdrop && sidebarMenu) {
+    sidebarBackdrop.addEventListener('click', () => {
+      sidebarMenu.classList.add('-translate-x-full');
+      sidebarMenu.classList.remove('translate-x-0');
+      sidebarBackdrop.classList.add('hidden');
+    });
+  }
+
+  // Live clock
+  function updateClock() {
+    const now = new Date();
+    const t = now.toLocaleTimeString('en-PK', {hour:'2-digit',minute:'2-digit'});
+    const d = now.toLocaleDateString('en-PK', {weekday:'short',day:'numeric',month:'short'});
+    document.getElementById('live-clock').textContent = t + ' · ' + d;
+    document.getElementById('hero-date').textContent = now.toLocaleDateString('en-PK', {weekday:'long',month:'short',day:'numeric'}) + ' • ' + t;
+  }
+  updateClock(); setInterval(updateClock, 1000);
+
+  // Typewriter
+  const aiText = document.getElementById('ai-insight');
+  const insight = "Lahore is sitting at 38°C today — about 5°C above this week's average and the warmest day in the current forecast window. Temperatures have been climbing steadily. Expect a gradual cooldown starting Thursday as a trough moves in from the northwest.";
+  let i = 0;
+  function type() { if(i < insight.length) { aiText.textContent += insight[i++]; setTimeout(type, 22); } }
+  setTimeout(type, 800);
+
+  // Gauge needle
+  setTimeout(() => {
+    document.querySelector('.gauge-needle').style.transform = 'rotate(148deg)';
+  }, 600);
+
+  // Score count-up
+  let score = 0;
+  const scoreEl = document.getElementById('score-num');
+  const scoreInterval = setInterval(() => {
+    score = Math.min(score + 2, 87);
+    scoreEl.textContent = score;
+    if(score >= 87) clearInterval(scoreInterval);
+  }, 20);
+
+  // Breakdown bars
+  setTimeout(() => { document.getElementById('bar-temp').style.width = '91%'; }, 400);
+  setTimeout(() => { document.getElementById('bar-hum').style.width = '72%'; }, 700);
+  setTimeout(() => { document.getElementById('bar-wind').style.width = '45%'; }, 1000);
+
+  // Unit toggle
+  let isCelsius = true;
+  document.getElementById('btn-c').addEventListener('click', () => {
+    isCelsius = true;
+    document.getElementById('temp-display').textContent = '38';
+    document.getElementById('unit-display').textContent = '°C';
+    document.getElementById('feels-display').textContent = '42°C';
+    document.getElementById('btn-c').classList.add('bg-primary','text-on-primary');
+    document.getElementById('btn-f').classList.remove('bg-primary','text-on-primary');
+  });
+  document.getElementById('btn-f').addEventListener('click', () => {
+    isCelsius = false;
+    document.getElementById('temp-display').textContent = '100';
+    document.getElementById('unit-display').textContent = '°F';
+    document.getElementById('feels-display').textContent = '108°F';
+    document.getElementById('btn-f').classList.add('bg-primary','text-on-primary');
+    document.getElementById('btn-c').classList.remove('bg-primary','text-on-primary');
+  });
+</script>
+</body></html>
